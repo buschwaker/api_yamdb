@@ -1,6 +1,6 @@
 import csv
 
-from auth_users.models import MyUser
+from reviews.models import MyUser
 
 
 def create_users():

@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'auth_users.apps.AuthUsersConfig',
+    'reviews.apps.ReviewsConfig',
     'reader.apps.ReaderConfig',
 ]
 
@@ -105,4 +105,4 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-AUTH_USER_MODEL = 'auth_users.MyUser'
+AUTH_USER_MODEL = 'reviews.MyUser'
