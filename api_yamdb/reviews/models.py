@@ -34,46 +34,77 @@ class MyUser(AbstractUser):
         super().save(*args, **kwargs)
 
 
-class Review(MyUser):
+class Title(models.Model):
+    """Модель тайтла."""
+    pass
+
+
+class Review(models.Model):
     """Модель отзыва."""
-    text = models.TextField(_('text'))
+    text = models.TextField(
+        verbose_name=_('text'),
+    )
     score = models.IntegerField(
         _('score'),
         validators=[
             MinValueValidator(1, 'Минимальная оценка: 1'),
-            MaxValueValidator(10, 'Максимальная оценка: 10')
+            MaxValueValidator(10, 'Максимальная оценка: 10'),
         ]
     )
-    title = models.ForeignKey(_('title'), Title, on_delete=models.CASCADE)
-    author = models.ForeignKey(_('author'), MyUser, on_delete=models.CASCADE)
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name=_('title'),
+    )
+    author = models.ForeignKey(
+        MyUser,
+        on_delete=models.CASCADE,
+        verbose_name=_('author'),
+    )
     pub_date = models.DateTimeField(
-        _('publishing date'), auto_now_add=True, db_index=True)
+        _('publishing date'),
+        auto_now_add=True,
+        db_index=True,
+    )
 
     def __str__(self):
         return self.text[:10]
 
     class Meta:
-        # Устаревший вариант, думаю не стоит юзать.
-        # unique_together = ('author', 'title')
-
         constraints = [
             models.UniqueConstraint(
                 fields=['author', 'title'],
-                name='unique_review'
+                name='unique_review',
             )
         ]
         ordering = ['-pub_date']
 
 
-class Comment(MyUser):
+class Comment(models.Model):
     """Модель комментария."""
     review = models.ForeignKey(
-        _('review'), Review, on_delete=models.CASCADE, related_name='comments')
-    title = models.ForeignKey(_('title'), Title, on_delete=models.CASCADE)
-    text = models.TextField(_('text'))
-    author = models.ForeignKey(_('author'), MyUser, on_delete=models.CASCADE)
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name=_('review'),
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name=_('title'),
+    )
+    text = models.TextField(
+        verbose_name=_('text'),
+    )
+    author = models.ForeignKey(
+        MyUser,
+        on_delete=models.CASCADE,
+        verbose_name=_('author'),
+    )
     pub_date = models.DateTimeField(
-        _('publishing date'), auto_now_add=True, db_index=True)
+        verbose_name=_('publishing date'),
+        auto_now_add=True,
+        db_index=True,)
 
     def __str__(self):
         return self.text[:10]
