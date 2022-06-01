@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -57,7 +58,7 @@ class Review(models.Model):
         verbose_name=_('title'),
     )
     author = models.ForeignKey(
-        MyUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name=_('author'),
     )
@@ -97,14 +98,15 @@ class Comment(models.Model):
         verbose_name=_('text'),
     )
     author = models.ForeignKey(
-        MyUser,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         verbose_name=_('author'),
     )
     pub_date = models.DateTimeField(
         verbose_name=_('publishing date'),
         auto_now_add=True,
-        db_index=True,)
+        db_index=True,
+    )
 
     def __str__(self):
         return self.text[:10]
