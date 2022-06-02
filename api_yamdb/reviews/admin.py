@@ -9,7 +9,10 @@ from .models import MyUser
 class MyUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password', 'role')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'bio')}),
+        (_('Personal info'),
+         {'fields': (
+             'first_name', 'last_name', 'email', 'bio', 'confirmation_code'
+         )}),
         (_('Permissions'), {
             'fields': (
                 'is_active',

@@ -4,10 +4,17 @@ from django.utils.translation import gettext_lazy as _
 
 
 class MyUser(AbstractUser):
-    email = models.EmailField(_('email address'), blank=False, null=False, max_length=254)
+    email = models.EmailField(
+        _('email address'),
+        blank=False,
+        null=False,
+        max_length=254,
+        unique=True
+    )
     first_name = models.CharField(_('first name'), max_length=150, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
     bio = models.TextField(blank=True)
+    confirmation_code = models.TextField(blank=True)
 
     anon = 'anon'
     user = 'user'

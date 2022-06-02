@@ -8,7 +8,7 @@ def create_users():
     Создание dummy data для пользователей из csv файла
     Запуск из shell:
 
-    from reader.csv_reader import create_users
+    from core.csv_reader import create_users
     create_users()
     """
     with open('static/data/users.csv') as csvfile:
