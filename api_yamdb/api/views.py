@@ -86,19 +86,20 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def get_tokens_for_user(request):
-    serializer = serializers.TokenSerializer(data=request.data)
-    if serializer.is_valid():
-        user = MyUser.objects.get(
-            username=request.data.get('username'),
-            confirmation_code=request.data.get('confirmation_code')
+class GetToken(APIView):
+    permission_classes = [AllowAny, ]
+
+    def post(self, request):
+        serializer = serializers.TokenSerializer(data=request.data)
+        if serializer.is_valid():
+            user = MyUser.objects.get(
+                username=request.data.get('username'),
+                confirmation_code=request.data.get('confirmation_code')
+            )
+            refresh = RefreshToken.for_user(user)
+            user.confirmation_code = ''
+            user.save()
+            return Response({'access': str(refresh.access_token), })
+        return Response(
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST
         )
-        refresh = RefreshToken.for_user(user)
-        user.confirmation_code = ''
-        user.save()
-        return Response({'access': str(refresh.access_token), })
-    return Response(
-        serializer.errors, status=status.HTTP_400_BAD_REQUEST
-    )

@@ -135,11 +135,6 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name=_('review'),
     )
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        verbose_name=_('title'),
-    )
     text = models.TextField(
         verbose_name=_('text'),
     )

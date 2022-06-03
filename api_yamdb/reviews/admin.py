@@ -8,6 +8,7 @@ from .models import Comment, MyUser, Review, Category, Genre, Title
 
 @admin.register(MyUser)
 class MyUserAdmin(UserAdmin):
+    """Панель администратора для модели MyUser"""
     fieldsets = (
         (None, {'fields': ('username', 'password', 'role')}),
         (_('Personal info'),

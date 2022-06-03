@@ -33,5 +33,5 @@ router_v1.register('users', views.UserViewSet, basename='user')
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
     path('v1/auth/signup/', views.SignUpView.as_view()),
-    path('v1/auth/token/', views.get_tokens_for_user),
+    path('v1/auth/token/', views.GetToken.as_view()),
 ]
