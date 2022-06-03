@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .models import Category, Genre, MyUser
+from .models import Comment, MyUser, Review, Category, Genre, Title
 
 
 @admin.register(MyUser)
@@ -55,3 +55,22 @@ class CategoryAdmin(admin.ModelAdmin):
     )
     list_filter = ('name',)
     empty_value_display = settings.EMPTY_VALUE_DISPLAY
+
+
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    """Страница отзывов."""
+    list_display = ('pk', 'pub_date', 'title', 'score', 'author', 'text')
+    search_fields = ('title', 'author', 'text')
+    list_filter = ('pub_date', 'title', 'score', 'author')
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    """Страница комментариев."""
+    list_display = ('pk', 'pub_date', 'review', 'author', 'text')
+    search_fields = ('author', 'text')
+    list_filter = ('pub_date', 'review', 'author')
+
+
+admin.site.register(Title)

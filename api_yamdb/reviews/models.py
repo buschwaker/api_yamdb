@@ -1,7 +1,8 @@
 import datetime
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -43,19 +44,19 @@ class MyUser(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField('Категория', max_length=255)
-    slug = models.SlugField('Slug категории', max_length=50, unique=True)
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Genre(models.Model):
-    name = models.CharField('Жанр', max_length=255)
-    slug = models.SlugField('Slug жанра', max_length=50, unique=True)
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Title(models.Model):
@@ -66,20 +67,93 @@ class Title(models.Model):
         help_text='Используйте формат: <ГГГГ>',
         verbose_name='Год создания'
     )
-    genre = models.ManyToManyField(
-        'Genre',
+    genres = models.ManyToManyField(
+        Genre,
         blank=True,
         verbose_name='Жанр произведения',
-        related_name='genre'
+        related_name='titles'
     )
     category = models.ForeignKey(
-        'Category',
+        Category,
         on_delete=models.SET_NULL,
         null=True,
         verbose_name='Категория',
-        related_name='category'
+        related_name='titles'
     )
     description = models.TextField('Описание', blank=True)
 
     def __str__(self):
         return self.name
+
+
+class Review(models.Model):
+    """Модель отзыва."""
+    text = models.TextField(
+        verbose_name=_('text'),
+    )
+    score = models.IntegerField(
+        _('score'),
+        validators=[
+            MinValueValidator(1, 'Минимальная оценка: 1'),
+            MaxValueValidator(10, 'Максимальная оценка: 10'),
+        ]
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name=_('title'),
+    )
+    author = models.ForeignKey(
+        MyUser,
+        on_delete=models.CASCADE,
+        verbose_name=_('author'),
+    )
+    pub_date = models.DateTimeField(
+        _('publishing date'),
+        auto_now_add=True,
+        db_index=True,
+    )
+
+    def __str__(self):
+        return self.text[:10]
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_review',
+            )
+        ]
+        ordering = ['-pub_date']
+
+
+class Comment(models.Model):
+    """Модель комментария."""
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name=_('review'),
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name=_('title'),
+    )
+    text = models.TextField(
+        verbose_name=_('text'),
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name=_('author'),
+        related_name='comments',
+    )
+    pub_date = models.DateTimeField(
+        verbose_name=_('publishing date'),
+        auto_now_add=True,
+        db_index=True,
+    )
+
+    def __str__(self):
+        return self.text[:10]
