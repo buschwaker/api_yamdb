@@ -1,18 +1,27 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework import status
+from rest_framework import filters, mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from django.core.mail import send_mail
+from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import MyUser
+from reviews.models import Category, Genre, MyUser, Title
 from api import serializers
 from core.key_generator import generate_alphanum_random_string
 from api import permissions
+
+
+class CreateDestroyListViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
 
 
 class SignUpView(APIView):
@@ -102,3 +111,31 @@ def get_tokens_for_user(request):
     return Response(
         serializer.errors, status=status.HTTP_400_BAD_REQUEST
     )
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    permission_classes = [permissions.IsAdminOrReadOnly, ]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return serializers.TitleReadSerializer
+        return serializers.TitleCreateSerializer
+
+
+class CategoryViewSet(CreateDestroyListViewSet):
+    queryset = Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+    permission_classes = [permissions.IsAdminOrReadOnly, ]
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class GenreViewSet(CreateDestroyListViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = serializers.GenreSerializer
+    permission_classes = [permissions.IsAdminOrReadOnly, ]
+    filter_backends = (filters.SearchFilter)
+    search_fields = ('name',)

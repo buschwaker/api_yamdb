@@ -26,9 +26,9 @@ router_v1 = NoPutRouter()
 
 # Здесь подключаем ресурсы
 router_v1.register('users', views.UserViewSet, basename='user')
-# router_v1.register('groups', GroupViewSet, basename='group')
-# router_v1.register('follow', FollowViewSet, basename='follow')
-
+router_v1.register('titles', views.TitleViewSet, basename='titles')
+router_v1.register('categories', views.CategoryViewSet, basename='categories')
+router_v1.register('genres', views.CategoryViewSet, basename='genres')
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
