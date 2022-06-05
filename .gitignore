@@ -150,3 +150,7 @@ media/
 
 migrations/
 
+# tests, requirements, setup
+tests/
+requirements.txt
+.setup.cfg

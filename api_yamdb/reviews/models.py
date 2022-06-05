@@ -102,6 +102,7 @@ class Review(models.Model):
         Title,
         on_delete=models.CASCADE,
         verbose_name=_('title'),
+        related_name='reviews'
     )
     author = models.ForeignKey(
         MyUser,
@@ -118,12 +119,6 @@ class Review(models.Model):
         return self.text[:10]
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['author', 'title'],
-                name='unique_review',
-            )
-        ]
         ordering = ['-pub_date']
 
 
@@ -134,11 +129,6 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name=_('review'),
-    )
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        verbose_name=_('title'),
     )
     text = models.TextField(
         verbose_name=_('text'),

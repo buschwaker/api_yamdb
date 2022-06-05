@@ -1,5 +1,4 @@
-from django.urls import path, include
-
+from django.urls import include, path
 from rest_framework import routers
 
 from . import views
@@ -26,9 +25,17 @@ router_v1 = NoPutRouter()
 
 # Здесь подключаем ресурсы
 router_v1.register('users', views.UserViewSet, basename='user')
-# router_v1.register('groups', GroupViewSet, basename='group')
-# router_v1.register('follow', FollowViewSet, basename='follow')
 
+router_v1.register(
+    r'titles/?P<title_id>[0-9]+/reviews/',
+    views.ReviewView,
+    basename='review',
+)
+router_v1.register(
+    r'titles/?P<title_id>[0-9]+/reviews/?P<review_id>[0-9]+/comments/',
+    views.CommentView,
+    basename='comment',
+)
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
