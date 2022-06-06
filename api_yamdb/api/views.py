@@ -15,6 +15,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import MyUser, Review, Title, Category, Genre
 from api import permissions, serializers
 from api.mixins import CreateDestroyListViewSet
+from api.filters import TitleFilter
 from core.key_generator import generate_alphanum_random_string
 
 
@@ -152,7 +153,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = [permissions.IsAdminOrReadOnly, ]
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -161,14 +162,16 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(CreateDestroyListViewSet):
+    lookup_field = 'slug'
     queryset = Category.objects.all()
     serializer_class = serializers.CategorySerializer
     permission_classes = [permissions.IsAdminOrReadOnly, ]
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = (filters.SearchFilter, )
     search_fields = ('name',)
 
 
 class GenreViewSet(CreateDestroyListViewSet):
+    lookup_field = 'slug'
     queryset = Genre.objects.all()
     serializer_class = serializers.GenreSerializer
     permission_classes = [permissions.IsAdminOrReadOnly, ]

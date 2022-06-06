@@ -96,7 +96,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
