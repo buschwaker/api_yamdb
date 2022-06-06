@@ -1,18 +1,17 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import viewsets
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
-
-from django.core.mail import send_mail
-
-from reviews.models import MyUser
-from api import serializers
+from api import permissions, serializers
 from core.key_generator import generate_alphanum_random_string
-from api import permissions
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (
+    AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,
+)
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+from reviews.models import MyUser, Review, Title
 
 
 class SignUpView(APIView):
@@ -103,3 +102,43 @@ class GetToken(APIView):
         return Response(
             serializer.errors, status=status.HTTP_400_BAD_REQUEST
         )
+
+
+class ReviewView(viewsets.ModelViewSet):
+    """Класс представления отзывов."""
+    serializer = serializers.ReviewSerializer
+    permission_classes = [
+        permissions.IsAuthor,
+        permissions.IsModerator,
+        permissions.IsAdmin,
+        IsAuthenticatedOrReadOnly,
+    ]
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        return title.reviews.all()
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, id=self.kwargs['title_id'])
+        serializer.save(author=self.request.user, title=title)
+
+
+class CommentView(viewsets.ModelViewSet):
+    """Класс представления комментария к отзывам."""
+    serializer = serializers.CommentSerializer
+    permission_classes = [
+        permissions.IsAuthor,
+        permissions.IsModerator,
+        permissions.IsAdmin,
+        IsAuthenticatedOrReadOnly,
+    ]
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        return review.comments.all()
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Review, id=self.kwargs['review_id'])
+        serializer.save(author=self.request.user, review=review)

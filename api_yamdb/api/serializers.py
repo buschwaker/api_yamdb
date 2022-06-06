@@ -1,7 +1,5 @@
-from rest_framework import serializers
-from rest_framework import exceptions
-
-from reviews.models import MyUser
+from rest_framework import exceptions, serializers
+from reviews.models import Comment, MyUser, Review
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -45,3 +43,42 @@ class TokenSerializer(serializers.Serializer):
         ):
             return attrs
         raise exceptions.ParseError("Невалидный код!")
+
+
+class ReviewSerializer(serializers.Serializer):
+    """Сериализатор отзывов."""
+    author = serializers.SlugRelatedField(
+        default=serializers.CurrentUserDefault,
+        slug_field='username',
+        read_only=True,
+    )
+
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
+
+    def validate(self, data):
+        title = self.context['view'].kwargs.get('title_id')
+        author = self.context['request'].user
+        review = Review.objects.filter(title=title, author=author)
+        if review.exists():
+            raise serializers.ValidationError('Вы уже оставляли отзыв.')
+        return data
+
+    def validate_score(self, score):
+        if 1 <= score <= 10:
+            return score
+        raise serializers.ValidationError('Оценка должна быть от 1 до 10.')
+
+
+class CommentSerializer(serializers.Serializer):
+    """Сериализатор комментариев."""
+    author = serializers.SlugRelatedField(
+        default=serializers.CurrentUserDefault,
+        slug_field='username',
+        read_only=True,
+    )
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')

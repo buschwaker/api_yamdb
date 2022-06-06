@@ -151,3 +151,10 @@ media/
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py
+=======
+migrations/
+
+# tests, requirements, setup
+tests/
+requirements.txt
+.setup.cfg

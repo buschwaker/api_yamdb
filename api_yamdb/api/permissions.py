@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class IsAdmin(BasePermission):
@@ -13,3 +13,12 @@ class IsModerator(BasePermission):
         if request.user.is_authenticated:
             return request.user.role == 'moderator'
         return False
+
+
+class IsAuthor(BasePermission):
+    """Переопределение базового класса BasePermission."""
+    message = 'Вам не являетесь автором.'
+
+    def has_object_permission(self, request, view, obj):
+        return (request.method in SAFE_METHODS
+                or obj.author == request.user)
