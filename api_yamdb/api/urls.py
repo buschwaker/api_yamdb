@@ -1,12 +1,11 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from . import views
+from api import views
 
 app_name = 'api'
 
 
-# у нас ни о кого нет PUT запросов, предлагаю регистрировать этот роутер
 class NoPutRouter(routers.DefaultRouter):
     """
     Класс роутер, отключающий PUT запросы
@@ -23,9 +22,10 @@ class NoPutRouter(routers.DefaultRouter):
 
 router_v1 = NoPutRouter()
 
-# Здесь подключаем ресурсы
 router_v1.register('users', views.UserViewSet, basename='user')
-
+router_v1.register('titles', views.TitleViewSet, basename='titles')
+router_v1.register('categories', views.CategoryViewSet, basename='categories')
+router_v1.register('genres', views.GenreViewSet, basename='genres')
 router_v1.register(
     r'titles/?P<title_id>[0-9]+/reviews/',
     views.ReviewView,
@@ -36,6 +36,7 @@ router_v1.register(
     views.CommentView,
     basename='comment',
 )
+
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),

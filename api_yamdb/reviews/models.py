@@ -67,7 +67,7 @@ class Title(models.Model):
         help_text='Используйте формат: <ГГГГ>',
         verbose_name='Год создания'
     )
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre,
         blank=True,
         verbose_name='Жанр произведения',

@@ -1,8 +1,8 @@
-from api import permissions, serializers
-from core.key_generator import generate_alphanum_random_string
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
@@ -11,7 +11,11 @@ from rest_framework.permissions import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import MyUser, Review, Title
+
+from reviews.models import MyUser, Review, Title, Category, Genre
+from api import permissions, serializers
+from api.mixins import CreateDestroyListViewSet
+from core.key_generator import generate_alphanum_random_string
 
 
 class SignUpView(APIView):
@@ -113,7 +117,7 @@ class ReviewView(viewsets.ModelViewSet):
         permissions.IsAdmin,
         IsAuthenticatedOrReadOnly,
     ]
-    pagination_class = PageNumberPagination
+    pagination_class = PageNumberPagination  # возможно это избыточно
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -133,7 +137,7 @@ class CommentView(viewsets.ModelViewSet):
         permissions.IsAdmin,
         IsAuthenticatedOrReadOnly,
     ]
-    pagination_class = PageNumberPagination
+    pagination_class = PageNumberPagination  # возможно это избыточно
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
@@ -142,3 +146,31 @@ class CommentView(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
         serializer.save(author=self.request.user, review=review)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    permission_classes = [permissions.IsAdminOrReadOnly, ]
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return serializers.TitleReadSerializer
+        return serializers.TitleCreateSerializer
+
+
+class CategoryViewSet(CreateDestroyListViewSet):
+    queryset = Category.objects.all()
+    serializer_class = serializers.CategorySerializer
+    permission_classes = [permissions.IsAdminOrReadOnly, ]
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ('name',)
+
+
+class GenreViewSet(CreateDestroyListViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = serializers.GenreSerializer
+    permission_classes = [permissions.IsAdminOrReadOnly, ]
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name',)
