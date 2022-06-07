@@ -62,7 +62,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if self.context['request'].method == 'PATCH':
             return data
 
-        title = self.context['view'].kwargs.get('title_id')
+        title = self.context['view'].kwargs['title_id']
         author = self.context['request'].user
         review = Review.objects.filter(title=title, author=author)
 
