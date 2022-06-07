@@ -158,3 +158,4 @@ migrations/
 tests/
 requirements.txt
 .setup.cfg
+README.md

@@ -47,10 +47,9 @@ class TokenSerializer(serializers.Serializer):
         raise exceptions.ParseError("Невалидный код!")
 
 
-class ReviewSerializer(serializers.Serializer):
+class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов."""
     author = serializers.SlugRelatedField(
-        default=serializers.CurrentUserDefault,
         slug_field='username',
         read_only=True,
     )
@@ -60,23 +59,26 @@ class ReviewSerializer(serializers.Serializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
     def validate(self, data):
+        if self.context['request'].method == 'PATCH':
+            return data
+
         title = self.context['view'].kwargs.get('title_id')
         author = self.context['request'].user
         review = Review.objects.filter(title=title, author=author)
+
         if review.exists():
-            raise serializers.ValidationError('Вы уже оставляли отзыв.')
+            raise serializers.ValidationError
         return data
 
     def validate_score(self, score):
         if 1 <= score <= 10:
             return score
-        raise serializers.ValidationError('Оценка должна быть от 1 до 10.')
+        raise serializers.ValidationError
 
 
-class CommentSerializer(serializers.Serializer):
+class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор комментариев."""
     author = serializers.SlugRelatedField(
-        default=serializers.CurrentUserDefault,
         slug_field='username',
         read_only=True,
     )
@@ -96,7 +98,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ('name', 'slug')
-        lookup_field = 'slug'
 
 
 class TitleReadSerializer(serializers.ModelSerializer):

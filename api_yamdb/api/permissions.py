@@ -15,17 +15,27 @@ class IsModerator(BasePermission):
         return False
 
 
-class IsAuthor(BasePermission):
-    """Переопределение базового класса BasePermission."""
-    message = 'Вам не являетесь автором.'
-
-    def has_object_permission(self, request, view, obj):
-        return (request.method in SAFE_METHODS
-                or obj.author == request.user)
-
-
 class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True
-        return request.user.is_authenticated and request.user.is_staff
+        elif request.user.is_authenticated:
+            return request.user.role == 'admin'
+        return False
+
+
+class IsAuthorModeratorAdmin(BasePermission):
+    """Права доступа: автора, модератора и администратора."""
+    message = ('Вы не являетесь автором, модератором или администратором.')
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        elif obj.author == request.user:
+            return True
+        elif (request.user.is_authenticated
+              and request.user.role == 'moderator'):
+            return True
+        elif (request.user.is_authenticated
+              and request.user.role == 'admin'):
+            return True

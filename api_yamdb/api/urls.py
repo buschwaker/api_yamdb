@@ -27,14 +27,14 @@ router_v1.register('titles', views.TitleViewSet, basename='titles')
 router_v1.register('categories', views.CategoryViewSet, basename='categories')
 router_v1.register('genres', views.GenreViewSet, basename='genres')
 router_v1.register(
-    r'titles/?P<title_id>[0-9]+/reviews/',
-    views.ReviewView,
-    basename='review',
+    r'titles/(?P<title_id>[0-9]+)/reviews',
+    views.ReviewViewSet,
+    basename='reviews',
 )
 router_v1.register(
-    r'titles/?P<title_id>[0-9]+/reviews/?P<review_id>[0-9]+/comments/',
-    views.CommentView,
-    basename='comment',
+    r'titles/(?P<title_id>[0-9]+)/reviews/(?P<review_id>[0-9]+)/comments',
+    views.CommentViewSet,
+    basename='comments',
 )
 
 
