@@ -22,20 +22,20 @@ class NoPutRouter(routers.DefaultRouter):
 
 router_v1 = NoPutRouter()
 
-router_v1.register('users', views.UserViewSet, basename='user')
-router_v1.register('titles', views.TitleViewSet, basename='titles')
-router_v1.register('categories', views.CategoryViewSet, basename='categories')
-router_v1.register('genres', views.GenreViewSet, basename='genres')
 router_v1.register(
-    r'titles/?P<title_id>[0-9]+/reviews/',
-    views.ReviewView,
+    r'titles/(?P<title_id>[0-9]+)/reviews',
+    views.ReviewViewSet,
     basename='review',
 )
 router_v1.register(
-    r'titles/?P<title_id>[0-9]+/reviews/?P<review_id>[0-9]+/comments/',
-    views.CommentView,
+    r'titles/(?P<title_id>[0-9]+)/reviews/(?P<review_id>[0-9]+)/comments',
+    views.CommentViewSet,
     basename='comment',
 )
+router_v1.register('users', views.UserViewSet, basename='user')
+router_v1.register('titles', views.TitleViewSet, basename='title')
+router_v1.register('categories', views.CategoryViewSet, basename='category')
+router_v1.register('genres', views.GenreViewSet, basename='genre')
 
 
 urlpatterns = [

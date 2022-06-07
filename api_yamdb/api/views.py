@@ -4,7 +4,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (
     AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly,
 )
@@ -109,16 +108,13 @@ class GetToken(APIView):
         )
 
 
-class ReviewView(viewsets.ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet):
     """Класс представления отзывов."""
-    serializer = serializers.ReviewSerializer
+    serializer_class = serializers.ReviewSerializer
     permission_classes = [
-        permissions.IsAuthor,
-        permissions.IsModerator,
-        permissions.IsAdmin,
         IsAuthenticatedOrReadOnly,
+        permissions.IsAuthorModeratorAdmin,
     ]
-    pagination_class = PageNumberPagination  # возможно это избыточно
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -129,16 +125,13 @@ class ReviewView(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, title=title)
 
 
-class CommentView(viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     """Класс представления комментария к отзывам."""
-    serializer = serializers.CommentSerializer
+    serializer_class = serializers.CommentSerializer
     permission_classes = [
-        permissions.IsAuthor,
-        permissions.IsModerator,
-        permissions.IsAdmin,
         IsAuthenticatedOrReadOnly,
+        permissions.IsAuthorModeratorAdmin,
     ]
-    pagination_class = PageNumberPagination  # возможно это избыточно
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])

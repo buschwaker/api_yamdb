@@ -154,7 +154,6 @@ media/
 =======
 migrations/
 
-# tests, requirements, setup
+# tests, setup
 tests/
-requirements.txt
 .setup.cfg
