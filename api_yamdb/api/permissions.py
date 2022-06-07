@@ -33,9 +33,7 @@ class IsAuthorModeratorAdmin(BasePermission):
             return True
         elif obj.author == request.user:
             return True
-        elif (request.user.is_authenticated
-              and request.user.role == 'moderator'):
+        elif request.user.role == 'moderator':
             return True
-        elif (request.user.is_authenticated
-              and request.user.role == 'admin'):
+        elif request.user.role == 'admin':
             return True
