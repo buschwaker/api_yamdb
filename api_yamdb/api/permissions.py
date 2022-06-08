@@ -3,25 +3,30 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.role == 'admin'
-        return False
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == 'admin'
+        )
 
 
 class IsModerator(BasePermission):
     def has_permission(self, request, view):
-        if request.user.is_authenticated:
-            return request.user.role == 'moderator'
-        return False
+        return bool(
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == 'moderator'
+        )
 
 
 class IsAdminOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        elif request.user.is_authenticated:
-            return request.user.role == 'admin'
-        return False
+        return bool(
+            request.method in SAFE_METHODS
+            or request.user
+            and request.user.is_authenticated
+            and request.user.role == 'admin'
+        )
 
 
 class IsAuthorModeratorAdmin(BasePermission):
@@ -29,11 +34,10 @@ class IsAuthorModeratorAdmin(BasePermission):
     message = 'Вы не являетесь автором, модератором или администратором.'
 
     def has_object_permission(self, request, view, obj):
-        if request.method in SAFE_METHODS:
-            return True
-        elif obj.author == request.user:
-            return True
-        elif request.user.role == 'moderator':
-            return True
-        elif request.user.role == 'admin':
-            return True
+        return bool(
+            request.method in SAFE_METHODS
+            or ((request.user and request.user.is_authenticated)
+                and request.user.role == 'admin'
+                or request.user.role == 'moderator'
+                or obj.author == request.user)
+        )

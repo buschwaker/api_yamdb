@@ -1,6 +1,7 @@
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import Http404
 
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
@@ -26,8 +27,8 @@ class SignUpView(APIView):
         username = request.data.get('username')
         email = request.data.get('email')
         try:
-            user = MyUser.objects.get(username=username, email=email)
-        except MyUser.DoesNotExist:
+            user = get_object_or_404(MyUser, username=username, email=email)
+        except Http404:
             serializer = serializers.SignUpSerializer(data=request.data)
             if serializer.is_valid():
                 user = MyUser.objects.create_user(
@@ -56,7 +57,6 @@ class SignUpView(APIView):
 
 class UserViewSet(viewsets.ModelViewSet):
     lookup_field = 'username'
-    # lookup_value_regex = '[\w.@+-]+ '
     lookup_value_regex = '(?!me).*'
     queryset = MyUser.objects.all()
     permission_classes = [permissions.IsAdmin, ]
@@ -102,7 +102,7 @@ class GetToken(APIView):
             refresh = RefreshToken.for_user(user)
             user.confirmation_code = ''
             user.save()
-            return Response({'access': str(refresh.access_token), })
+            return Response({'token': str(refresh.access_token), })
         return Response(
             serializer.errors, status=status.HTTP_400_BAD_REQUEST
         )
